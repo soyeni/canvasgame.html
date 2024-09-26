@@ -1,0 +1,675 @@
+Tryna sign me in or do I just do it later
+ 
+How does our professor open GitHub code in the browser to test the code
+ 
+I have. Absolutely no idea. I don’t know how to open my own code in GitHub, I use w3’s try it editor
+ 
+How do I open that
+ 
+Google
+ 
+Ok
+ 
+Did your billing account close before? And did you have to use a free trial?
+ 
+No everything has been fine besides the different layouts
+ 
+Can you help me with game dev assignment 1 when u have time this week pls idk how to get my source images to show up 🙏🏾
+ 
+Ik it’s late
+ 
+Assignment 1 as in the game study
+ 
+Or assignment 2 as in web game
+ 
+The web game
+ 
+Mhm
+ 
+do we have that teams meeting today for game dev
+ 
+We probably should but no we don’t
+ 
+kk
+ 
+ 
+ 
+ 
+do i go to class : )
+ 
+no ok
+ 
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+
+canvas {
+
+    border:1px solid #d3d3d3;
+
+    background-color: #f1f1f1;
+
+}
+</style>
+</head>
+<body onload="startGame()">
+<script>
+
+var myGamePiece;
+
+var myObstacles = [];
+
+var myScore;
+
+var isPaused = false;  // Flag to track pause state
+
+var backgroundMusic;   // Variable to store background music
+ 
+function startGame() {
+
+    myGamePiece = new component(30, 30, "pink", 10, 120);
+
+    myGamePiece.gravity = 0.05;
+
+    myScore = new component("20px", "Arial", "black", 350, 40, "text");
+
+    myScore.text = "SCORE: 0"; // Initialize score text
+
+    myGameArea.start();
+ 
+    // Play background music when the game starts
+
+    backgroundMusic = new Audio('https://docs.google.com/uc?export=download&id=1w11Rx3AsnZbOU_xM1t6dOMQNt-7I7Iuf');
+
+    backgroundMusic.loop = true;  // Make the music loop
+
+    backgroundMusic.play();
+ 
+    // Add event listeners for key controls
+
+    window.addEventListener('keydown', function (e) {
+
+        myGameArea.keys = (myGameArea.keys || []);
+
+        myGameArea.keys[e.keyCode] = true;
+
+    })
+
+    window.addEventListener('keyup', function (e) {
+
+        myGameArea.keys[e.keyCode] = false;
+
+    })
+
+}
+ 
+var myGameArea = {
+
+    canvas : document.createElement("canvas"),
+
+    start : function() {
+
+        this.canvas.width = 480;
+
+        this.canvas.height = 270;
+
+        this.context = this.canvas.getContext("2d");
+
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
+        this.frameNo = 0;
+
+        this.interval = setInterval(updateGameArea, 20);  // Game loop
+
+    },
+
+    stop : function() {
+
+        clearInterval(this.interval);  // Stop the game loop
+
+        backgroundMusic.pause();  // Stop the music when the game is stopped
+
+    },
+
+    clear : function() {
+
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    },
+
+    pause : function() {
+
+        if (isPaused) {
+
+            this.interval = setInterval(updateGameArea, 20);  // Resume game loop
+
+            backgroundMusic.play();  // Resume music
+
+        } else {
+
+            clearInterval(this.interval);  // Pause game loop
+
+            backgroundMusic.pause();  // Pause music
+
+        }
+
+        isPaused = !isPaused;  // Toggle pause state
+
+    }
+
+}
+ 
+function restartGame() {
+
+    // Stop the current game loop and reset the background music
+
+    myGameArea.stop();
+
+    backgroundMusic.currentTime = 0;  // Restart music
+ 
+    // Reset game variables
+
+    myObstacles = [];
+
+    myGameArea.frameNo = 0;
+ 
+    // Reinitialize game components
+
+    myGamePiece = new component(30, 30, "pink", 10, 120);
+
+    myGamePiece.gravity = 0.05;
+
+    myScore = new component("20px", "Arial", "black", 350, 40, "text");
+
+    myScore.text = "SCORE: 0";
+ 
+    // Start the game
+
+    myGameArea.start();
+
+}
+ 
+function component(width, height, color, x, y, type) {
+
+    this.type = type;
+
+    this.text = ""; // Initialize text property
+
+    this.width = width;
+
+    this.height = height;
+
+    this.speedX = 0;
+
+    this.speedY = 0;    
+
+    this.x = x;
+
+    this.y = y;
+
+    this.gravity = 0;
+
+    this.gravitySpeed = 0;
+
+    this.update = function() {
+
+        var ctx = myGameArea.context;
+
+        if (this.type == "text") {
+
+            ctx.font = this.width + " " + this.height;
+
+            ctx.fillStyle = color;
+
+            ctx.fillText(this.text, this.x, this.y);
+
+        } else {
+
+            ctx.fillStyle = color;
+
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        }
+
+    }
+
+    this.newPos = function() {
+
+        this.gravitySpeed += this.gravity;
+
+        this.x += this.speedX;
+
+        this.y += this.speedY + this.gravitySpeed;
+
+        this.hitBottom();
+
+        this.hitCeiling();
+
+    }
+
+    this.hitBottom = function() {
+
+        var rockbottom = myGameArea.canvas.height - this.height;
+
+        if (this.y > rockbottom) {
+
+            this.y = rockbottom;
+
+            this.gravitySpeed = 0;
+
+        }
+
+    }
+
+    this.hitCeiling = function() {
+
+        var rocktop = 0;
+
+        if (this.y < rocktop) {
+
+            this.y = rocktop;
+
+            this.gravitySpeed = 0;
+
+        }
+
+    }
+
+    this.crashWith = function(otherobj) {
+
+        var myleft = this.x;
+
+        var myright = this.x + (this.width);
+
+        var mytop = this.y;
+
+        var mybottom = this.y + (this.height);
+
+        var otherleft = otherobj.x;
+
+        var otherright = otherobj.x + (otherobj.width);
+
+        var othertop = otherobj.y;
+
+        var otherbottom = otherobj.y + (otherobj.height);
+
+        var crash = true;
+
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+
+            crash = false;
+
+        }
+
+        return crash;
+
+    }
+
+}
+ 
+function updateGameArea() {
+
+    if (isPaused) return;  // Don't update if the game is paused
+
+    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+
+    for (i = 0; i < myObstacles.length; i += 1) {
+
+        if (myGamePiece.crashWith(myObstacles[i])) {
+
+            return;
+
+        } 
+
+    }
+
+    myGameArea.clear();
+
+    myGameArea.frameNo += 1;
+
+    if (myGameArea.frameNo == 1 || everyinterval(150)) {
+
+        x = myGameArea.canvas.width;
+
+        minHeight = 20;
+
+        maxHeight = 200;
+
+        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+
+        minGap = 50;
+
+        maxGap = 200;
+
+        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+
+        myObstacles.push(new component(10, height, "green", x, 0));
+
+        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+
+    }
+
+    for (i = 0; i < myObstacles.length; i += 1) {
+
+        myObstacles[i].x += -1;
+
+        myObstacles[i].update();
+
+    }
+ 
+    // Check for key inputs for movement
+
+    myGamePiece.speedX = 0;
+
+    myGamePiece.speedY = 0;
+
+    if (myGameArea.keys && myGameArea.keys[37] || myGameArea.keys[65]) {myGamePiece.speedX = -1; }  // Left Arrow or 'A'
+
+    if (myGameArea.keys && myGameArea.keys[39] || myGameArea.keys[68]) {myGamePiece.speedX = 1; }   // Right Arrow or 'D'
+
+    if (myGameArea.keys && myGameArea.keys[38] || myGameArea.keys[87]) {myGamePiece.speedY = -10; }  // Up Arrow or 'W'
+
+    if (myGameArea.keys && myGameArea.keys[40] || myGameArea.keys[83]) {myGamePiece.speedY = 10; }   // Down Arrow or 'S'
+ 
+    myScore.text = "SCORE: " + myGameArea.frameNo;
+
+    myScore.update();
+
+    myGamePiece.newPos();
+
+    myGamePiece.update();
+
+}
+ 
+function everyinterval(n) {
+
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+
+    return false;
+
+}
+ 
+function accelerate(n) {
+
+    myGamePiece.gravity = n;
+
+}
+</script>
+<br>
+ 
+<button onclick="restartGame()">RESTART</button>
+<button onclick="myGameArea.pause()">PAUSE/RESUME</button> <!-- Added Pause/Resume Button -->
+<p>Use the ACCELERATE button to stay in the air</p>
+<p>Click RESTART to reset the game</p>
+<p>Click PAUSE/RESUME to pause or resume the game</p>
+</body>
+</html>
+ 
+html folder
+ 
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Flappy Bird Game</title><style>body {             display: flex;             justify-content: center;             align-items: center;             height: 100vh;             margin: 0;             background-color: #70c5ce;         }         canvas {             border: 2px solid #000; background-color: #fff; } </style></head><body><canvas id="gameCanvas" width="320" height="480"></canvas><script src="game.js"></script></body></html>
+ 
+.js folder 
+ 
+const canvas = document.getElementById('gameCanvas');
+
+const ctx = canvas.getContext('2d');
+ 
+// Bird settings
+
+const bird = {
+
+    x: 50,
+
+    y: 150,
+
+    width: 20,
+
+    height: 20,
+
+    gravity: 0.6,
+
+    lift: -15,
+
+    velocity: 0,
+
+};
+ 
+// Pipe settings
+
+let pipes = [];
+
+const pipeWidth = 30;
+
+const pipeGap = 100;
+
+const pipeFrequency = 90; // How often pipes appear (in frames)
+
+let frameCount = 0;
+ 
+// Game state
+
+let score = 0;
+
+let isGameOver = false;
+ 
+// Load bird image
+
+const birdImg = new Image();
+
+birdImg.src = 'https://i.imgur.com/srULmcH.png';
+ 
+// Listen for key presses
+
+document.addEventListener('keydown', () => {
+
+    bird.velocity = bird.lift;
+
+});
+ 
+// Create pipes
+
+function createPipe() {
+
+    const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 40)) + 20;
+
+    pipes.push({
+
+        x: canvas.width,
+
+        topHeight: pipeHeight,
+
+        bottomHeight: canvas.height - pipeHeight - pipeGap,
+
+    });
+
+}
+ 
+// Draw bird
+
+function drawBird() {
+
+    ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+}
+ 
+// Draw pipes
+
+function drawPipes() {
+
+    pipes.forEach(pipe => {
+
+        ctx.fillStyle = '#333';
+
+        // Top pipe
+
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+
+        // Bottom pipe
+
+        ctx.fillRect(pipe.x, canvas.height - pipe.bottomHeight, pipeWidth, pipe.bottomHeight);
+
+    });
+
+}
+ 
+// Update bird
+
+function updateBird() {
+
+    bird.velocity += bird.gravity;
+
+    bird.y += bird.velocity;
+ 
+    // Prevent bird from falling out of canvas
+
+    if (bird.y + bird.height > canvas.height) {
+
+        bird.y = canvas.height - bird.height;
+
+        bird.velocity = 0;
+
+        isGameOver = true;
+
+    } else if (bird.y < 0) {
+
+        bird.y = 0;
+
+        bird.velocity = 0;
+
+    }
+
+}
+ 
+// Update pipes
+
+function updatePipes() {
+
+    pipes.forEach((pipe, index) => {
+
+        pipe.x -= 2;
+ 
+        // If the pipe is off the screen, remove it and increase score
+
+        if (pipe.x + pipeWidth < 0) {
+
+            pipes.splice(index, 1);
+
+            score++;
+
+        }
+ 
+        // Check collision with pipes
+
+        if (bird.x < pipe.x + pipeWidth && bird.x + bird.width > pipe.x &&
+
+            (bird.y < pipe.topHeight || bird.y + bird.height > canvas.height - pipe.bottomHeight)) {
+
+            isGameOver = true;
+
+        }
+
+    });
+
+}
+ 
+// Main game loop
+
+function gameLoop() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+    if (isGameOver) {
+
+        ctx.fillStyle = '#000';
+
+        ctx.font = '30px Arial';
+
+        ctx.fillText('Game Over!', 80, canvas.height / 2);
+
+        ctx.font = '20px Arial';
+
+        ctx.fillText('Score: ' + score, 120, canvas.height / 2 + 40);
+
+        return;
+
+    }
+ 
+    updateBird();
+
+    updatePipes();
+
+    drawBird();
+
+    drawPipes();
+ 
+    // Add new pipes
+
+    frameCount++;
+
+    if (frameCount % pipeFrequency === 0) {
+
+        createPipe();
+
+    }
+ 
+    // Draw score
+
+    ctx.fillStyle = '#000';
+
+    ctx.font = '20px Arial';
+
+    ctx.fillText('Score: ' + score, 10, 30);
+ 
+    requestAnimationFrame(gameLoop);
+
+}
+ 
+// Start game
+
+gameLoop();
+
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flappy Bird Game</title>
+<style>
+
+        body {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            height: 100vh;
+
+            margin: 0;
+
+            background-color: #70c5ce;
+
+        }
+ 
+        canvas {
+
+            border: 2px solid #000;
+
+            background-color: #fff;
+
+        }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas" width="320" height="480"></canvas>
+ 
+    <script src="game.js"></script>
+</body>
+</html>
+
+ 
