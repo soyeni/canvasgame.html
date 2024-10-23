@@ -10,7 +10,8 @@ canvas {
 </style>
 </head>
 <body onload="startGame()">
-    <button onClick=>"startGame()"> Start the Game </button>
+    <button onClick="startGame()"> Start the Game </button>
+
 <script>
 
 var myGamePiece;
@@ -18,7 +19,7 @@ var myObstacles = [];
 var myScore;
 
 function startGame() {
-    myGamePiece = new component(30, 30, "red", 10, 120);
+    myGamePiece = new component(60, 60, "/mnt/data/santa.png", 10, 120, "image");
     myGamePiece.gravity = 0.29;
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myGameArea.start();
@@ -39,8 +40,12 @@ var myGameArea = {
     }
 }
 
-function component(width, height, color, x, y, type) {
+function component(width, height, imgSrc, x, y, type) {
     this.type = type;
+    if (this.type === "image") {
+        this.image = new Image();
+        this.image.src = imgSrc;
+    }
     this.score = 0;
     this.width = width;
     this.height = height;
@@ -52,12 +57,14 @@ function component(width, height, color, x, y, type) {
     this.gravitySpeed = 0;
     this.update = function() {
         ctx = myGameArea.context;
-        if (this.type == "text") {
+        if (this.type === "image") {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else if (this.type == "text") {
             ctx.font = this.width + " " + this.height;
-            ctx.fillStyle = color;
+            ctx.fillStyle = imgSrc; // Used as color for text
             ctx.fillText(this.text, this.x, this.y);
         } else {
-            ctx.fillStyle = color;
+            ctx.fillStyle = imgSrc;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
@@ -108,8 +115,8 @@ function updateGameArea() {
         minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        myObstacles.push(new component(10, height, "green", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+        myObstacles.push(new component(50, height, "/mnt/data/cane.png", x, 0, "image"));
+        myObstacles.push(new component(50, x - height - gap, "/mnt/data/cane.png", x, height + gap, "image"));
     }
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
